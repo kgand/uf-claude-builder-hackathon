@@ -1,37 +1,1757 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<repomix>
-  <metadata>
-    <version>1.0.0</version>
-    <timestamp>2024-01-01T00:00:00Z</timestamp>
-  </metadata>
-  <content>
-    <file path="frontend/app/page.tsx">
-      <![CDATA[
-import { ChatContainer } from '@/components/chat/ChatContainer'
-import { Layout } from '@/components/layout/Layout'
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+app/
+  globals.css
+  layout.tsx
+  page.tsx
+components/
+  chat/
+    ActionStep.tsx
+    AgentActionStatus.tsx
+    ChatContainer.tsx
+    ChatInput.tsx
+    ChatMessage.tsx
+    CollapsibleActionItem.tsx
+    ScreenshotGallery.tsx
+  layout/
+    Layout.tsx
+    Sidebar.tsx
+  ui/
+    Button.tsx
+    LoadingSpinner.tsx
+    sunburst-icon.tsx
+    tabs.tsx
+  AgentInvocation.tsx
+  BrowserAgentComponent.tsx
+  BrowserView.tsx
+  CommandBar.tsx
+  ConversationView.tsx
+  Layout.tsx
+  Sidebar.tsx
+context/
+  ChatContext.tsx
+lib/
+  types.ts
+  utils.ts
+  websocket.ts
+public/
+  file.svg
+  globe.svg
+  next.svg
+  vercel.svg
+  window.svg
+.gitignore
+components.json
+eslint.config.mjs
+next.config.js
+package.json
+postcss.config.mjs
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="components/ui/sunburst-icon.tsx">
+import React from 'react';
+
+interface SunburstIconProps {
+  className?: string;
+}
+
+export const SunburstIcon: React.FC<SunburstIconProps> = ({ className = "" }) => {
+  return (
+    <svg 
+      className={className} 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="12" cy="12" r="6" fill="currentColor" />
+      <path 
+        fillRule="evenodd" 
+        clipRule="evenodd" 
+        d="M12 2V5M12 19V22M22 12H19M5 12H2M18.36 5.64L16.24 7.76M7.76 16.24L5.64 18.36M18.36 18.36L16.24 16.24M7.76 7.76L5.64 5.64" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+
+export default SunburstIcon;
+</file>
+
+<file path="components/AgentInvocation.tsx">
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Screenshot, AgentStatus } from "../lib/types";
+import { BrowserAgentContent } from "../components/BrowserAgentComponent";
+
+interface AgentInvocationProps {
+  title: string;
+  agentType?: string;
+  status?: "pending" | "in_progress" | "completed" | "failed";
+  initiallyOpen?: boolean;
+  screenshots?: Screenshot[];
+}
+
+export const AgentInvocation: React.FC<AgentInvocationProps> = ({
+  title,
+  agentType = "browser",
+  status = "in_progress",
+  initiallyOpen = false,
+  screenshots = [],
+}) => {
+  const [isOpen, setIsOpen] = useState(initiallyOpen);
+
+  // Agent type icon and color mapping
+  const agentStyles = {
+    "master": {
+      icon: "👑",
+      bgColor: "bg-[#F2E9E1]",
+      textColor: "text-[#D97A4D]",
+      hoverBg: "hover:bg-[#EAE0D5]",
+      iconBg: "bg-[#D97A4D]",
+      iconText: "text-white"
+    },
+    "browser": {
+      icon: "🌐",
+      bgColor: "bg-[#E6F7F1]",
+      textColor: "text-[#2D9D78]",
+      hoverBg: "hover:bg-[#D7F0E7]",
+      iconBg: "bg-[#2D9D78]",
+      iconText: "text-white"
+    },
+    "api": {
+      icon: "🔌",
+      bgColor: "bg-[#F6F2FF]",
+      textColor: "text-[#7C3AED]",
+      hoverBg: "hover:bg-[#EDE7F8]",
+      iconBg: "bg-[#7C3AED]",
+      iconText: "text-white"
+    },
+    "data": {
+      icon: "📊",
+      bgColor: "bg-[#FFF7E6]",
+      textColor: "text-[#D97706]",
+      hoverBg: "hover:bg-[#FBF0D9]",
+      iconBg: "bg-[#D97706]",
+      iconText: "text-white"
+    }
+  }[agentType] || { 
+    icon: "🤖", 
+    bgColor: "bg-[#F2E9E1]", 
+    textColor: "text-[#6B5A55]",
+    hoverBg: "hover:bg-[#EAE0D5]",
+    iconBg: "bg-[#6B5A55]",
+    iconText: "text-white"
+  };
+
+  // Status indicator
+  const statusIndicator = () => {
+    switch (status) {
+      case "in_progress":
+        return <Loader2 className="w-4 h-4 animate-spin" />;
+      case "completed":
+        return <div className="w-2 h-2 rounded-full bg-green-500" />;
+      case "failed":
+        return <div className="w-2 h-2 rounded-full bg-red-500" />;
+      default:
+        return <div className="w-2 h-2 rounded-full bg-gray-300" />;
+    }
+  };
+
+  // Latest screenshot for display
+  const latestScreenshot = screenshots.length > 0 ? screenshots[screenshots.length - 1] : null;
+
+  return (
+    <div className="mb-4 rounded-lg border border-[#E8E1D8] overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full p-3 flex items-center justify-between text-left ${agentStyles.bgColor} ${agentStyles.hoverBg} transition-colors`}
+      >
+        <div className="flex items-center gap-2">
+          <div className={`w-5 h-5 rounded-full ${agentStyles.iconBg} ${agentStyles.iconText} flex items-center justify-center text-xs`}>
+            {agentStyles.icon}
+          </div>
+          <span className={`${agentStyles.textColor} font-medium`}>{title}</span>
+          <div className={agentStyles.textColor}>
+            {statusIndicator()}
+          </div>
+        </div>
+        {isOpen ? (
+          <ChevronUp className={`w-4 h-4 ${agentStyles.textColor}`} />
+        ) : (
+          <ChevronDown className={`w-4 h-4 ${agentStyles.textColor}`} />
+        )}
+      </button>
+      
+      {isOpen && (
+        <div className="p-4 bg-white">
+          <BrowserAgentContent 
+            screenshots={screenshots}
+            status={status === "in_progress" ? AgentStatus.Executing : 
+                   status === "completed" ? AgentStatus.Done :
+                   status === "failed" ? AgentStatus.Error : AgentStatus.Idle}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AgentInvocation;
+</file>
+
+<file path="components/BrowserAgentComponent.tsx">
+import React, { useState } from 'react';
+import { Loader2, ExternalLink, Image } from 'lucide-react';
+import { Screenshot, AgentStatus } from '../lib/types';
+
+interface BrowserAgentContentProps {
+  screenshots?: Screenshot[];
+  status: AgentStatus;
+  url?: string;
+  logs?: string[];
+}
+
+export const BrowserAgentContent: React.FC<BrowserAgentContentProps> = ({
+  screenshots = [],
+  status,
+  url,
+  logs = []
+}) => {
+  const [selectedIndex, setSelectedIndex] = useState(screenshots.length > 0 ? screenshots.length - 1 : 0);
+  const latestScreenshot = screenshots.length > 0 ? screenshots[screenshots.length - 1] : null;
+  const selectedScreenshot = screenshots[selectedIndex];
+
+  return (
+    <div className="space-y-4">
+      {/* URL Bar */}
+      {url && (
+        <div className="bg-[#F2F2F2] rounded-md p-2 flex items-center gap-2">
+          {status === AgentStatus.Executing ? (
+            <Loader2 className="w-4 h-4 text-[#6B5A55] animate-spin" />
+          ) : status === AgentStatus.Done ? (
+            <div className="w-4 h-4 rounded-full bg-green-500"></div>
+          ) : status === AgentStatus.Error ? (
+            <div className="w-4 h-4 rounded-full bg-red-500"></div>
+          ) : (
+            <div className="w-4 h-4 rounded-full bg-gray-300"></div>
+          )}
+          <div className="flex-1 text-sm bg-white rounded px-2 py-1 text-[#2D2D2D] truncate font-mono">
+            {url}
+          </div>
+          {url && (
+            <a 
+              href={url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[#6B5A55] hover:text-[#D97A4D]"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Screenshot Display */}
+      {screenshots.length > 0 ? (
+        <div className="space-y-3">
+          {/* Main screenshot display */}
+          <div className="rounded-lg overflow-hidden border border-[#E8E1D8]">
+            {selectedScreenshot.base64 ? (
+              <img
+                src={`data:image/png;base64,${selectedScreenshot.base64}`}
+                alt={`Screenshot step ${selectedScreenshot.step}`}
+                className="w-full object-contain"
+              />
+            ) : (
+              <img
+                src={selectedScreenshot.url || "/placeholder.svg"}
+                alt={`Screenshot step ${selectedScreenshot.step}`}
+                className="w-full object-contain"
+              />
+            )}
+            <div className="text-xs text-[#6B5A55] p-2 bg-[#F9F5F1]">
+              Step {selectedScreenshot.step} of {screenshots.length}
+              {selectedScreenshot.description && ` - ${selectedScreenshot.description}`}
+            </div>
+          </div>
+
+          {/* Thumbnail navigation for multiple screenshots */}
+          {screenshots.length > 1 && (
+            <div className="flex overflow-x-auto gap-2 pb-2">
+              {screenshots.map((screenshot, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedIndex(index)}
+                  className={`cursor-pointer border-2 rounded-md overflow-hidden flex-shrink-0 ${
+                    index === selectedIndex ? "border-[#D97A4D]" : "border-[#E8E1D8]"
+                  }`}
+                >
+                  {screenshot.base64 ? (
+                    <img
+                      src={`data:image/png;base64,${screenshot.base64}`}
+                      alt={`Thumbnail ${index + 1}`}
+                      width={80}
+                      height={60}
+                      className="object-cover w-20 h-14"
+                    />
+                  ) : (
+                    <img
+                      src={screenshot.url || "/placeholder.svg"}
+                      alt={`Thumbnail ${index + 1}`}
+                      width={80}
+                      height={60}
+                      className="object-cover w-20 h-14"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="py-6 flex flex-col items-center justify-center text-[#6B5A55]">
+          {status === AgentStatus.Executing ? (
+            <>
+              <Loader2 className="w-8 h-8 mb-2 animate-spin" />
+              <p>Loading page content...</p>
+            </>
+          ) : status === AgentStatus.Error ? (
+            <div className="text-red-500">Error loading content</div>
+          ) : (
+            <>
+              <Image className="w-8 h-8 mb-2 text-[#E8E1D8]" />
+              <p>No screenshots available</p>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Browser Activity Logs */}
+      {logs.length > 0 && (
+        <div className="bg-[#F9F5F1] border border-[#E8E1D8] rounded-md p-3">
+          <h3 className="font-medium text-[#2D2D2D] mb-2">Browser Activity</h3>
+          <div className="space-y-1 max-h-40 overflow-y-auto text-xs">
+            {logs.map((log, idx) => (
+              <div key={idx} className="flex items-start gap-2">
+                <span className="text-[#6B5A55] font-mono whitespace-nowrap">
+                  {new Date().toLocaleTimeString()}
+                </span>
+                <span className="text-[#2D2D2D]">{log}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BrowserAgentContent;
+</file>
+
+<file path="components/ui/Button.tsx">
+import React, { ButtonHTMLAttributes } from 'react';
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean;
+}
+
+const Button: React.FC<ButtonProps> = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  isLoading = false,
+  className = '',
+  disabled,
+  ...props
+}) => {
+  const baseClass = 'font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+  
+  const variantClasses = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200 focus:ring-gray-400',
+    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
+  };
+  
+  const sizeClasses = {
+    sm: 'px-2 py-1 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3 text-lg',
+  };
+  
+  const disabledClass = 'opacity-50 cursor-not-allowed';
+
+  return (
+    <button
+      className={`${baseClass} ${variantClasses[variant]} ${sizeClasses[size]} ${
+        disabled || isLoading ? disabledClass : ''
+      } ${className}`}
+      disabled={disabled || isLoading}
+      {...props}
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center">
+          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>{children}</span>
+        </div>
+      ) : (
+        children
+      )}
+    </button>
+  );
+};
+
+export default Button;
+</file>
+
+<file path="components/ui/LoadingSpinner.tsx">
+import React from 'react';
+
+interface LoadingSpinnerProps {
+  size?: number;
+  color?: string;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = 24,
+  color = 'currentColor',
+}) => {
+  return (
+    <div className="flex justify-center items-center">
+      <svg
+        className="animate-spin"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke={color}
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill={color}
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+    </div>
+  );
+};
+
+export default LoadingSpinner;
+</file>
+
+<file path="components/ui/tabs.tsx">
+"use client"
+
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
+
+import { cn } from "@/lib/utils"
+
+function Tabs({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+  return (
+    <TabsPrimitive.Root
+      data-slot="tabs"
+      className={cn("flex flex-col gap-2", className)}
+      {...props}
+    />
+  )
+}
+
+function TabsList({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.List>) {
+  return (
+    <TabsPrimitive.List
+      data-slot="tabs-list"
+      className={cn(
+        "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function TabsTrigger({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+  return (
+    <TabsPrimitive.Trigger
+      data-slot="tabs-trigger"
+      className={cn(
+        "data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function TabsContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+  return (
+    <TabsPrimitive.Content
+      data-slot="tabs-content"
+      className={cn("flex-1 outline-none", className)}
+      {...props}
+    />
+  )
+}
+
+export { Tabs, TabsList, TabsTrigger, TabsContent }
+</file>
+
+<file path="components/BrowserView.tsx">
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { type AgentAction, AgentStatus, type Screenshot } from "../lib/types"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader2, Monitor, ImageIcon, List, X } from "lucide-react"
+
+interface BrowserViewProps {
+  action: AgentAction | null
+  status: AgentStatus
+  screenshots: Screenshot[]
+}
+
+const BrowserView: React.FC<BrowserViewProps> = ({ action, status, screenshots }) => {
+  const [activeTab, setActiveTab] = useState("live")
+  const latestScreenshot = screenshots.length > 0 ? screenshots[screenshots.length - 1] : null
+
+  const isLoading = status === AgentStatus.Thinking || status === AgentStatus.Executing
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <Monitor size={18} className="text-amber-600" />
+          <h2 className="font-medium text-gray-900">Browser View</h2>
+          {isLoading && (
+            <div className="flex items-center gap-1 text-xs text-amber-600">
+              <Loader2 size={14} className="animate-spin" />
+              <span>{status === AgentStatus.Thinking ? "Thinking..." : "Executing..."}</span>
+            </div>
+          )}
+        </div>
+        <button className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="live" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+        <div className="border-b border-gray-200">
+          <TabsList className="bg-transparent border-b-0 p-0">
+            <TabsTrigger
+              value="live"
+              className="data-[state=active]:border-amber-600 data-[state=active]:text-amber-600 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2"
+            >
+              Live View
+            </TabsTrigger>
+            <TabsTrigger
+              value="gallery"
+              className="data-[state=active]:border-amber-600 data-[state=active]:text-amber-600 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2"
+            >
+              Screenshots
+            </TabsTrigger>
+            <TabsTrigger
+              value="steps"
+              className="data-[state=active]:border-amber-600 data-[state=active]:text-amber-600 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2"
+            >
+              Steps
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        {/* Live View Tab */}
+        <TabsContent value="live" className="flex-1 overflow-auto p-4 m-0 data-[state=inactive]:hidden">
+          {latestScreenshot ? (
+            <div className="rounded-lg overflow-hidden border border-gray-200 bg-white">
+              {latestScreenshot.base64 ? (
+                <img
+                  src={`data:image/png;base64,${latestScreenshot.base64}`}
+                  alt="Current browser view"
+                  className="w-full object-contain"
+                />
+              ) : (
+                <img
+                  src={latestScreenshot.url || "/placeholder.svg"}
+                  alt="Current browser view"
+                  className="w-full object-contain"
+                />
+              )}
+              <div className="p-3 border-t border-gray-200 text-sm text-gray-700">
+                {latestScreenshot.description || `Step ${latestScreenshot.step}`}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+              <Monitor size={48} className="mb-4 text-gray-300" />
+              <p>No browser activity yet</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Screenshots Gallery Tab */}
+        <TabsContent value="gallery" className="flex-1 overflow-auto p-4 m-0 data-[state=inactive]:hidden">
+          {screenshots.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {screenshots.map((screenshot, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                  {screenshot.base64 ? (
+                    <img
+                      src={`data:image/png;base64,${screenshot.base64}`}
+                      alt={`Screenshot ${index + 1}`}
+                      className="w-full h-40 object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={screenshot.url || "/placeholder.svg"}
+                      alt={`Screenshot ${index + 1}`}
+                      className="w-full h-40 object-cover"
+                    />
+                  )}
+                  <div className="p-2 border-t border-gray-200">
+                    <div className="text-xs text-gray-500">Step {screenshot.step}</div>
+                    <div className="text-sm text-gray-700 truncate">
+                      {screenshot.description || `Screenshot ${index + 1}`}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+              <ImageIcon size={48} className="mb-4 text-gray-300" />
+              <p>No screenshots available</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Steps Tab */}
+        <TabsContent value="steps" className="flex-1 overflow-auto p-4 m-0 data-[state=inactive]:hidden">
+          {action ? (
+            <div className="space-y-4">
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="font-medium text-gray-900">{action.title}</h3>
+                {action.description && <p className="text-sm text-gray-700 mt-1">{action.description}</p>}
+              </div>
+
+              <div className="relative pl-6 border-l-2 border-amber-200 space-y-6 py-2">
+                {screenshots.map((screenshot, index) => (
+                  <div key={index} className="relative">
+                    <div className="absolute -left-[25px] w-4 h-4 rounded-full bg-amber-500 border-4 border-white"></div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200 ml-4">
+                      <div className="text-sm font-medium text-gray-900 mb-2">
+                        {screenshot.description || `Step ${screenshot.step}`}
+                      </div>
+                      <div className="border border-gray-200 rounded-lg overflow-hidden">
+                        {screenshot.base64 ? (
+                          <img
+                            src={`data:image/png;base64,${screenshot.base64}`}
+                            alt={`Step ${screenshot.step}`}
+                            className="w-full object-contain"
+                          />
+                        ) : (
+                          <img
+                            src={screenshot.url || "/placeholder.svg"}
+                            alt={`Step ${screenshot.step}`}
+                            className="w-full object-contain"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {isLoading && (
+                  <div className="relative">
+                    <div className="absolute -left-[25px] w-4 h-4 rounded-full bg-gray-300 border-4 border-white animate-pulse"></div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200 ml-4">
+                      <div className="flex items-center gap-2">
+                        <Loader2 size={16} className="animate-spin text-amber-600" />
+                        <div className="text-sm font-medium text-gray-900">
+                          {status === AgentStatus.Thinking ? "Thinking..." : "Executing..."}
+                        </div>
+                      </div>
+                      <div className="space-y-2 mt-4">
+                        <div className="h-2 bg-gray-100 rounded animate-pulse w-3/4"></div>
+                        <div className="h-2 bg-gray-100 rounded animate-pulse w-1/2"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+              <List size={48} className="mb-4 text-gray-300" />
+              <p>No steps available</p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+export default BrowserView
+</file>
+
+<file path="components/CommandBar.tsx">
+"use client"
+
+import type React from "react"
+import { useState, useRef, useEffect } from "react"
+import { useChat } from "../context/ChatContext"
+import { AgentStatus } from "../lib/types"
+import { Send, Paperclip, Sparkles, X, Loader2 } from "lucide-react"
+
+const CommandBar: React.FC = () => {
+  const [message, setMessage] = useState("")
+  const [isExpanded, setIsExpanded] = useState(false)
+  const { agentStatus, sendMessage } = useChat()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const isDisabled = agentStatus === AgentStatus.Thinking || agentStatus === AgentStatus.Executing
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (message.trim() && !isDisabled) {
+      sendMessage(message)
+      setMessage("")
+      setIsExpanded(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit(e)
+    } else if (e.key === "Escape") {
+      setIsExpanded(false)
+    }
+  }
+
+  // Focus input when expanded
+  useEffect(() => {
+    if (isExpanded && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isExpanded])
+
+  return (
+    <div className="border-t border-gray-200 bg-white p-4">
+      <div className="max-w-4xl mx-auto">
+        {isExpanded ? (
+          <form onSubmit={handleSubmit} className="relative">
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={() => setIsExpanded(false)}
+                className="p-2 text-gray-400 hover:text-gray-600"
+              >
+                <X size={18} />
+              </button>
+              <input
+                ref={inputRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={isDisabled ? "Processing your request..." : "Type your command or question..."}
+                disabled={isDisabled}
+                className="flex-1 p-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+              />
+              <div className="flex items-center gap-2">
+                <button type="button" className="p-2 text-gray-400 hover:text-gray-600" disabled={isDisabled}>
+                  <Paperclip size={18} />
+                </button>
+                <button
+                  type="submit"
+                  disabled={!message.trim() || isDisabled}
+                  className={`p-2 rounded-full ${
+                    !message.trim() || isDisabled ? "text-gray-400" : "text-amber-600 hover:bg-amber-50"
+                  }`}
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            </div>
+          </form>
+        ) : (
+          <div
+            onClick={() => setIsExpanded(true)}
+            className="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-text hover:border-amber-300 transition-colors"
+          >
+            <div className="text-gray-500">Type a command or ask a question...</div>
+            <div className="flex items-center gap-2">
+              {isDisabled ? (
+                <div className="animate-spin text-amber-600">
+                  <Loader2 size={18} />
+                </div>
+              ) : (
+                <Sparkles size={18} className="text-amber-600" />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default CommandBar
+</file>
+
+<file path="components/ConversationView.tsx">
+"use client"
+
+import type React from "react"
+import { useEffect, useRef } from "react"
+import { useChat } from "../context/ChatContext"
+import { MessageRole, type Message } from "../lib/types"
+import { User, Bot, ArrowRight } from "lucide-react"
+
+const ConversationView: React.FC = () => {
+  const { currentChat } = useChat()
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [currentChat?.messages])
+
+  if (!currentChat) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
+        <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-amber-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-medium text-gray-900 mb-2">Welcome to c-drive</h2>
+        <p className="text-center max-w-md mb-6">
+          Ask me to browse the web, analyze content, or help you with research. I can navigate websites and show you
+          what I find.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
+          {[
+            { title: "Browse a website", description: "I can visit websites and show you what I find" },
+            { title: "Research a topic", description: "I can gather information from multiple sources" },
+            { title: "Compare products", description: "I can help you evaluate different options" },
+            { title: "Find information", description: "I can search for specific details online" },
+          ].map((suggestion, index) => (
+            <div
+              key={index}
+              className="bg-white p-4 rounded-lg border border-gray-200 hover:border-amber-300 cursor-pointer transition-colors"
+            >
+              <h3 className="font-medium text-gray-900 mb-1">{suggestion.title}</h3>
+              <p className="text-sm text-gray-500">{suggestion.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200 bg-white">
+        <h2 className="text-lg font-medium text-gray-900">{currentChat.title || "New Analysis"}</h2>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {currentChat.messages.map((message, index) => (
+          <MessageItem key={index} message={message} />
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+    </div>
+  )
+}
+
+interface MessageItemProps {
+  message: Message
+}
+
+const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
+  const isUser = message.role === MessageRole.User
+
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <div className={`flex max-w-3xl ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+        {/* Avatar */}
+        <div className={`flex-shrink-0 ${isUser ? "ml-4" : "mr-4"}`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              isUser ? "bg-amber-100" : "bg-gray-100"
+            }`}
+          >
+            {isUser ? <User size={16} className="text-amber-700" /> : <Bot size={16} className="text-gray-700" />}
+          </div>
+        </div>
+
+        {/* Message content */}
+        <div className={`rounded-lg p-4 ${isUser ? "bg-amber-50 text-gray-800" : "bg-white border border-gray-200"}`}>
+          <div className="whitespace-pre-wrap">{message.content}</div>
+
+          {/* Action summary (if any) */}
+          {!isUser && message.agentActions && message.agentActions.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center gap-2 text-sm font-medium text-amber-700 mb-2">
+                <ArrowRight size={16} />
+                <span>Actions Performed</span>
+              </div>
+              <div className="space-y-2">
+                {message.agentActions.map((action, index) => (
+                  <div key={index} className="text-sm">
+                    <span className="font-medium">{action.title}</span>
+                    {action.description && <span className="text-gray-500"> - {action.description}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default ConversationView
+</file>
+
+<file path="components/Layout.tsx">
+"use client"
+
+import type React from "react"
+import { useChat } from "../context/ChatContext"
+import CommandBar from "./CommandBar"
+import BrowserView from "./BrowserView"
+import Sidebar from "./Sidebar"
+import { AgentStatus } from "../lib/types"
+
+const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const { agentStatus, currentAction, currentScreenshots } = useChat()
+  const isAgentActive = agentStatus === AgentStatus.Thinking || agentStatus === AgentStatus.Executing
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main content area */}
+      <div className="flex flex-col flex-1 h-full overflow-hidden">
+        {/* Split view when agent is active */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Chat/conversation area - takes full width when agent not active */}
+          <div className={`flex flex-col ${isAgentActive ? "w-1/2" : "w-full"} h-full transition-all duration-300`}>
+            {children}
+          </div>
+
+          {/* Browser view - only visible when agent is active */}
+          {isAgentActive && (
+            <div className="w-1/2 h-full border-l border-gray-200 bg-white transition-all duration-300 ease-in-out">
+              <BrowserView action={currentAction} status={agentStatus} screenshots={currentScreenshots} />
+            </div>
+          )}
+        </div>
+
+        {/* Command bar at bottom */}
+        <CommandBar />
+      </div>
+    </div>
+  )
+}
+
+export default Layout
+</file>
+
+<file path="components/Sidebar.tsx">
+"use client"
+
+import type React from "react"
+import { useChat } from "../context/ChatContext"
+import { Plus, MessageSquare, History, Star, Settings, ChevronRight } from "lucide-react"
+
+const Sidebar: React.FC = () => {
+  const { chats, currentChat, createNewChat, selectChat } = useChat()
+
+  // Group chats by date (today, yesterday, older)
+  const starredChats = chats.filter((chat) => chat.isStarred)
+  const recentChats = chats.filter((chat) => !chat.isStarred)
+
+  return (
+    <div className="w-64 h-full bg-white border-r border-gray-200 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+            <svg className="w-5 h-5 text-amber-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+            </svg>
+          </div>
+          <h1 className="text-lg font-medium text-gray-900">c-drive</h1>
+        </div>
+        <button className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+          <Settings size={18} />
+        </button>
+      </div>
+
+      {/* New chat button */}
+      <div className="p-4">
+        <button
+          onClick={createNewChat}
+          className="w-full flex items-center justify-between p-3 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Plus size={18} />
+            <span className="font-medium">New Analysis</span>
+          </div>
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      {/* Chat lists */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Starred chats */}
+        {starredChats.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+              <Star size={14} />
+              <span>Starred</span>
+            </div>
+            <div className="space-y-1 px-2">
+              {starredChats.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => selectChat(chat.id)}
+                  className={`w-full flex items-center gap-2 p-2 rounded-md text-left ${
+                    currentChat?.id === chat.id ? "bg-amber-50 text-amber-800" : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <MessageSquare size={16} />
+                  <span className="truncate text-sm">{chat.title || "New Analysis"}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent chats */}
+        <div>
+          <div className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+            <History size={14} />
+            <span>Recent</span>
+          </div>
+          <div className="space-y-1 px-2">
+            {recentChats.length > 0 ? (
+              recentChats.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => selectChat(chat.id)}
+                  className={`w-full flex items-center gap-2 p-2 rounded-md text-left ${
+                    currentChat?.id === chat.id ? "bg-amber-50 text-amber-800" : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <MessageSquare size={16} />
+                  <span className="truncate text-sm">{chat.title || "New Analysis"}</span>
+                </button>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500">No recent analyses</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Sidebar
+</file>
+
+<file path="lib/types.ts">
+export enum MessageRole {
+  User = 'user',
+  Assistant = 'assistant',
+  System = 'system'
+}
+
+export enum AgentStatus {
+  Idle = 'idle',
+  Thinking = 'thinking',
+  Executing = 'executing',
+  Done = 'done',
+  Error = 'error'
+}
+
+export interface AgentAction {
+  title: string;
+  description?: string;
+  status: AgentStatus;
+}
+
+export interface Screenshot {
+  url: string;
+  base64?: string;
+  step: number;
+  description?: string;
+}
+
+export interface Message {
+  id: string;
+  role: MessageRole;
+  content: string;
+  timestamp: Date;
+  agentActions?: AgentAction[];
+  screenshots?: Screenshot[];
+  result?: string;
+}
+
+export interface Chat {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TaskRequest {
+  task: string;
+  context?: Record<string, any>;
+}
+
+export interface TaskResponse {
+  result: string;
+  status: string;
+  screenshot_urls: string[];
+}
+
+export interface WebSocketMessage {
+  screenshot_url?: string;
+  screenshot_base64?: string;
+  step?: number;
+  result?: string;
+  status?: string;
+  error?: string;
+  done?: boolean;
+  screenshot_urls?: string[];
+}
+</file>
+
+<file path="lib/utils.ts">
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+</file>
+
+<file path="lib/websocket.ts">
+import { TaskRequest, WebSocketMessage } from './types';
+
+export class WebSocketClient {
+  private ws: WebSocket | null = null;
+  private url: string;
+  private onMessageCallback: (data: WebSocketMessage) => void;
+  private onOpenCallback: () => void;
+  private onCloseCallback: () => void;
+  private onErrorCallback: (error: Event) => void;
+
+  constructor(
+    url: string,
+    onMessage: (data: WebSocketMessage) => void,
+    onOpen: () => void = () => {},
+    onClose: () => void = () => {},
+    onError: (error: Event) => void = () => {}
+  ) {
+    this.url = url;
+    this.onMessageCallback = onMessage;
+    this.onOpenCallback = onOpen;
+    this.onCloseCallback = onClose;
+    this.onErrorCallback = onError;
+  }
+
+  connect(): void {
+    if (this.ws) {
+      this.ws.close();
+    }
+
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () => {
+      this.onOpenCallback();
+    };
+
+    this.ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data) as WebSocketMessage;
+        this.onMessageCallback(data);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    this.ws.onclose = () => {
+      this.onCloseCallback();
+      this.ws = null;
+    };
+
+    this.ws.onerror = (error) => {
+      this.onErrorCallback(error);
+    };
+  }
+
+  sendMessage(task: TaskRequest): void {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(task));
+    } else {
+      console.error('WebSocket is not connected');
+    }
+  }
+
+  disconnect(): void {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  isConnected(): boolean {
+    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+  }
+}
+
+// Singleton instance for app-wide access
+let wsClient: WebSocketClient | null = null;
+
+export const getWebSocketClient = (
+  url: string = 'ws://localhost:8000/ws/agent',
+  onMessage: (data: WebSocketMessage) => void,
+  onOpen: () => void = () => {},
+  onClose: () => void = () => {},
+  onError: (error: Event) => void = () => {}
+): WebSocketClient => {
+  if (!wsClient) {
+    wsClient = new WebSocketClient(url, onMessage, onOpen, onClose, onError);
+  }
+  return wsClient;
+};
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="components.json">
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+</file>
+
+<file path="eslint.config.mjs">
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+];
+
+export default eslintConfig;
+</file>
+
+<file path="next.config.js">
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    domains: ['localhost'], // Add your domains here for Image optimization
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:8000/:path*', // Proxy API requests to FastAPI backend
+      },
+      {
+        source: '/session_screenshots/:path*',
+        destination: 'http://localhost:8000/session_screenshots/:path*', // Proxy screenshots
+      },
+    ];
+  },
+};
+
+module.exports = nextConfig;
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 245, 245, 245;
+}
+
+html {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Prevent textarea from growing infinitely */
+textarea {
+  max-height: 200px;
+}
+</file>
+
+<file path="app/layout.tsx">
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Inter({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Inter({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="app/page.tsx">
+"use client"
+
+import React from 'react';
+import Layout from '../components/layout/Layout';
+import ChatContainer from '../components/chat/ChatContainer';
+import { ChatProvider } from '../context/ChatContext';
 
 export default function Home() {
   return (
+    <ChatProvider>
       <Layout>
-      <div className="flex h-screen">
+        <ChatContainer />
+      </Layout>
+    </ChatProvider>
+  );
+}
+</file>
+
+<file path="components/layout/Layout.tsx">
+// components/layout/Layout.tsx
+import React, { ReactNode } from 'react';
+import Sidebar from './Sidebar';
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  return (
+    <div className="flex h-screen bg-white">
+      <Sidebar />
+      <main className="flex-1 overflow-hidden">{children}</main>
+    </div>
+  );
+};
+
+export default Layout;
+</file>
+
+<file path="postcss.config.mjs">
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+export default config;
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.js"],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="components/chat/CollapsibleActionItem.tsx">
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { FiChevronDown, FiChevronUp, FiCircle } from "react-icons/fi"
+import type { Screenshot } from "../../lib/types"
+import ScreenshotGallery from "./ScreenshotGallery"
+
+interface CollapsibleActionItemProps {
+  title: string
+  icon?: React.ReactNode
+  isActive?: boolean
+  isLoading?: boolean
+  screenshots?: Screenshot[]
+  children?: React.ReactNode
+}
+
+const CollapsibleActionItem: React.FC<CollapsibleActionItemProps> = ({
+  title,
+  icon,
+  isActive = false,
+  isLoading = false,
+  screenshots = [],
+  children,
+}) => {
+  const [isOpen, setIsOpen] = useState(true)
+
+  return (
+    <div className="mb-3">
+      <div
+        className="flex items-center gap-2 py-2 px-2 text-gray-700 cursor-pointer hover:bg-amber-50 rounded-md"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center justify-center w-6 h-6">
+          {icon ||
+            (isLoading ? (
+              <div className="animate-spin text-amber-600">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            ) : (
+              <FiCircle className={`w-4 h-4 ${isActive ? "text-amber-500" : "text-gray-500"}`} />
+            ))}
+        </div>
+        <div className="flex-1 text-sm">{title}</div>
+        <div className="text-gray-500">
+          {isOpen ? <FiChevronDown className="w-5 h-5" /> : <FiChevronUp className="w-5 h-5" />}
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="pl-8 pr-2 py-2 mt-1">
+          {screenshots && screenshots.length > 0 && (
+            <div className="border border-gray-300 rounded-md overflow-hidden bg-white">
+              <ScreenshotGallery screenshots={screenshots} />
+            </div>
+          )}
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default CollapsibleActionItem
+</file>
+
+<file path="components/layout/Sidebar.tsx">
+import React from 'react';
+import { useChat } from '../../context/ChatContext';
+import { FiPlus, FiMessageSquare } from 'react-icons/fi';
+
+const Sidebar: React.FC = () => {
+  const { chats, currentChat, createNewChat, selectChat } = useChat();
+
+  return (
     <aside className="w-64 h-full bg-white border-r border-gray-200 flex flex-col">
       <div className="flex gap-2 p-4 border-b border-gray-200">
         <svg className="mt-0.5 w-6 h-6 text-amber-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
         </svg>
-            <h1 className="text-xl text-amber-800 font-semibold">c-drive</h1>
+        <h1 className="text-xl text-amber-800 font-semibold">c-drive</h1>
       </div>
 
       <div className="p-2">
         <button
           onClick={createNewChat}
-              className="w-full flex items-center gap-2 p-2 text-left text-gray-700 hover:bg-amber-50 rounded-lg transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              New Chat
+          className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-amber-50 transition-colors"
+        >
+          <FiPlus className="text-gray-600" />
+          <span className="text-gray-800">Start new chat</span>
         </button>
+      </div>
+
+      <div className="p-3 text-sm font-medium text-gray-700">
+        <h2>Starred</h2>
       </div>
 
       <div className="px-2">
@@ -39,23 +1759,828 @@ export default function Home() {
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer"
         >
           <FiMessageSquare className="text-gray-600" />
-              <span className="text-gray-800">Introducing c-drive</span>
+          <span className="text-gray-800">Introducing c-drive</span>
         </div>
       </div>
 
       <div className="p-3 text-sm font-medium text-gray-700">
         <h2>Recents</h2>
       </div>
-    </aside>
 
-        <main className="flex-1 flex flex-col">
-          <ChatContainer />
-        </main>
+      <div className="flex-1 overflow-y-auto px-2">
+        {chats.map((chat) => (
+          <div
+            key={chat.id}
+            className={`flex items-center gap-2 p-2 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer ${
+              currentChat?.id === chat.id ? 'bg-amber-50' : ''
+            }`}
+            onClick={() => selectChat(chat.id)}
+          >
+            <FiMessageSquare className="text-gray-600" />
+            <span className="truncate text-gray-800">{chat.title || '(New chat)'}</span>
+          </div>
+        ))}
       </div>
-    </Layout>
+    </aside>
+  );
+};
+
+export default Sidebar;
+</file>
+
+<file path="components/chat/ChatInput.tsx">
+"use client"
+
+import React, { useState, useRef, useEffect } from 'react';
+import { useChat } from '../../context/ChatContext';
+import { AgentStatus } from '../../lib/types';
+
+interface ChatInputProps {
+  onSendMessage: (message: string) => void;
+}
+
+const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
+  const [message, setMessage] = useState('');
+  const { agentStatus } = useChat();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  const isDisabled = agentStatus === AgentStatus.Thinking || agentStatus === AgentStatus.Executing;
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [message]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (message.trim() && !isDisabled) {
+      onSendMessage(message);
+      setMessage('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <form onSubmit={handleSubmit} className="relative">
+        <input
+          ref={textareaRef}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={
+            isDisabled 
+              ? "Processing your request..." 
+              : "Type your message..."
+          }
+          disabled={isDisabled}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500/30 bg-white text-gray-900 placeholder-gray-500"
+        />
+        <button
+          type="submit"
+          disabled={!message.trim() || isDisabled}
+          className={`absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1 rounded-md ${
+            !message.trim() || isDisabled
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : 'bg-amber-100 text-gray-800 hover:bg-amber-200 border border-amber-200'
+          }`}
+        >
+          Send
+        </button>
+      </form>
+      <div className="text-xs text-gray-500 mt-1 ml-1">
+        Press Enter to send, Shift+Enter for new line
+      </div>
+    </div>
+  );
+}
+
+export default ChatInput;
+</file>
+
+<file path="components/chat/ScreenshotGallery.tsx">
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import type { Screenshot } from "../../lib/types"
+
+interface ScreenshotGalleryProps {
+  screenshots: Screenshot[]
+}
+
+const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({ screenshots }) => {
+  const [selectedIndex, setSelectedIndex] = useState(screenshots.length - 1)
+  const selectedScreenshot = screenshots[selectedIndex]
+
+  return (
+    <div className="p-3 max-w-400px">
+      {/* Main screenshot display */}
+      <div className="rounded-lg overflow-hidden mb-3 bg-gray-900">
+        {selectedScreenshot.base64 ? (
+          <img
+            src={`data:image/png;base64,${selectedScreenshot.base64}`}
+            alt={`Screenshot step ${selectedScreenshot.step}`}
+            className="w-full object-contain"
+          />
+        ) : (
+          <img
+            src={selectedScreenshot.url || "/placeholder.svg"}
+            alt={`Screenshot step ${selectedScreenshot.step}`}
+            className="w-full object-contain"
+          />
+        )}
+      </div>
+
+      {/* Thumbnail navigation */}
+      {screenshots.length > 1 && (
+        <div className="flex overflow-x-auto gap-2 pb-2">
+          {screenshots.map((screenshot, index) => (
+            <div
+              key={index}
+              onClick={() => setSelectedIndex(index)}
+              className={`cursor-pointer border-2 rounded-md overflow-hidden flex-shrink-0 ${
+                index === selectedIndex ? "border-amber-500" : "border-gray-700"
+              }`}
+            >
+              {screenshot.base64 ? (
+                <img
+                  src={`data:image/png;base64,${screenshot.base64}`}
+                  alt={`Thumbnail ${index + 1}`}
+                  width={80}
+                  height={60}
+                  className="object-cover w-20 h-14"
+                />
+              ) : (
+                <img
+                  src={screenshot.url || "/placeholder.svg"}
+                  alt={`Thumbnail ${index + 1}`}
+                  width={80}
+                  height={60}
+                  className="object-cover w-20 h-14"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Step indicator */}
+      <div className="text-xs text-gray-400 mt-1">
+        Step {selectedScreenshot.step} of {screenshots.length}
+        {selectedScreenshot.description && ` - ${selectedScreenshot.description}`}
+      </div>
+    </div>
   )
 }
-      ]]>
+
+export default ScreenshotGallery
 </file>
-  </content>
-</repomix>
+
+<file path="context/ChatContext.tsx">
+"use client"
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { 
+  Chat, 
+  Message, 
+  MessageRole, 
+  AgentStatus, 
+  Screenshot, 
+  AgentAction, 
+  WebSocketMessage 
+} from '../lib/types';
+import { getWebSocketClient } from '../lib/websocket';
+
+interface ChatContextType {
+  chats: Chat[];
+  currentChat: Chat | null;
+  agentStatus: AgentStatus;
+  currentScreenshots: Screenshot[];
+  currentAction: AgentAction | null;
+  isConnected: boolean;
+  sendMessage: (content: string) => void;
+  createNewChat: () => void;
+  selectChat: (chatId: string) => void;
+  deleteChat: (chatId: string) => void;
+}
+
+const ChatContext = createContext<ChatContextType | undefined>(undefined);
+
+export const useChat = () => {
+  const context = useContext(ChatContext);
+  if (context === undefined) {
+    throw new Error('useChat must be used within a ChatProvider');
+  }
+  return context;
+};
+
+interface ChatProviderProps {
+  children: ReactNode;
+}
+
+export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [currentChat, setCurrentChat] = useState<Chat | null>(null);
+  const [agentStatus, setAgentStatus] = useState<AgentStatus>(AgentStatus.Idle);
+  const [currentScreenshots, setCurrentScreenshots] = useState<Screenshot[]>([]);
+  const [currentAction, setCurrentAction] = useState<AgentAction | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+
+  const handleWebSocketMessage = (data: WebSocketMessage) => {
+    console.log('WebSocket message received:', data);
+    if (data.screenshot_url && data.step !== undefined) {
+      const newScreenshot: Screenshot = {
+        url: data.screenshot_url,
+        base64: data.screenshot_base64,
+        step: data.step,
+        description: data.status,
+      };
+      
+      setCurrentScreenshots(prev => [...prev, newScreenshot]);
+      
+      // Update the current action to reflect progress
+      setCurrentAction(prev => {
+        if (prev) {
+          return {
+            ...prev,
+            status: AgentStatus.Executing,
+            // description: `Step ${data.step}: Processing`,
+          };
+        }
+        return prev;
+      });
+    }
+
+    if (data.error) {
+      setAgentStatus(AgentStatus.Error);
+      // Pass the current action and screenshots to preserve them
+      addAgentMessage(`Error: ${data.error}`, 
+        currentAction ? [currentAction] : [], 
+        [...currentScreenshots]
+      );
+    }
+
+    if (data.done && data.result) {
+      setAgentStatus(AgentStatus.Done);
+      // Save the current action and screenshots with the message
+      // instead of clearing them immediately
+      addAgentMessage(data.result, 
+        currentAction ? [currentAction] : [], 
+        [...currentScreenshots]
+      );
+      
+      // Reset current states after saving them with the message
+      setTimeout(() => {
+        setCurrentAction(null);
+        setCurrentScreenshots([]);
+      }, 500);
+    }
+  };
+
+  // Initialize with a default chat and WebSocket connection
+  useEffect(() => {
+    const storedChats = localStorage.getItem('c-drive-chats');
+    if (storedChats) {
+      try {
+        const parsedChats = JSON.parse(storedChats) as Chat[];
+        setChats(parsedChats);
+        if (parsedChats.length > 0) {
+          setCurrentChat(parsedChats[0]);
+        } else {
+          createNewChat();
+        }
+      } catch (error) {
+        console.error('Error parsing stored chats:', error);
+        createNewChat();
+      }
+    } else {
+      createNewChat();
+    }
+
+    // Initialize the WebSocket client
+    const wsClient = getWebSocketClient(
+      'ws://localhost:8000/ws/agent',
+      handleWebSocketMessage,
+      () => setIsConnected(true),
+      () => {
+        setIsConnected(false);
+        setAgentStatus(AgentStatus.Idle);
+      },
+      (error) => {
+        console.error('WebSocket error:', error);
+        setAgentStatus(AgentStatus.Error);
+      }
+    );
+    
+    // Connect immediately
+    wsClient.connect();
+    
+    // Reconnect logic for handling disconnections
+    const reconnectInterval = setInterval(() => {
+      if (!wsClient.isConnected()) {
+        console.log('Attempting to reconnect WebSocket...');
+        wsClient.connect();
+      }
+    }, 5000); // Check every 5 seconds
+    
+    // Cleanup function
+    return () => {
+      clearInterval(reconnectInterval);
+      wsClient.disconnect();
+    };
+  }, []);
+
+  // Save chats to localStorage when they change
+  useEffect(() => {
+    if (chats.length > 0) {
+      localStorage.setItem('c-drive-chats', JSON.stringify(chats));
+    }
+  }, [chats]);
+
+  const createNewChat = () => {
+    const newChat: Chat = {
+      id: uuidv4(),
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    setChats(prev => [newChat, ...prev]);
+    setCurrentChat(newChat);
+    setCurrentScreenshots([]);
+    setCurrentAction(null);
+    setAgentStatus(AgentStatus.Idle);
+  };
+
+  const selectChat = (chatId: string) => {
+    const chat = chats.find(c => c.id === chatId);
+    if (chat) {
+      setCurrentChat(chat);
+      setCurrentScreenshots([]);
+      setCurrentAction(null);
+      setAgentStatus(AgentStatus.Idle);
+    }
+  };
+
+  const deleteChat = (chatId: string) => {
+    setChats(prev => prev.filter(c => c.id !== chatId));
+    if (currentChat?.id === chatId) {
+      const remainingChats = chats.filter(c => c.id !== chatId);
+      if (remainingChats.length > 0) {
+        setCurrentChat(remainingChats[0]);
+      } else {
+        createNewChat();
+      }
+    }
+  };
+
+  const addUserMessage = (content: string) => {
+    if (!currentChat) return;
+    
+    const newMessage: Message = {
+      id: uuidv4(),
+      role: MessageRole.User,
+      content,
+      timestamp: new Date(),
+    };
+    
+    const updatedChat: Chat = {
+      ...currentChat,
+      messages: [...currentChat.messages, newMessage],
+      title: content.length > 30 ? `${content.substring(0, 30)}...` : content,
+      updatedAt: new Date(),
+    };
+    
+    setCurrentChat(updatedChat);
+    setChats(prev => prev.map(c => c.id === updatedChat.id ? updatedChat : c));
+  };
+
+  const addAgentMessage = (content: string, agentActions: AgentAction[] = [], screenshots: Screenshot[] = []) => {
+    if (!currentChat) return;
+    
+    const newMessage: Message = {
+      id: uuidv4(),
+      role: MessageRole.Assistant,
+      content,
+      timestamp: new Date(),
+      agentActions: agentActions.length > 0 ? [...agentActions] : undefined,
+      screenshots: screenshots.length > 0 ? [...screenshots] : undefined,
+    };
+    
+    const updatedChat: Chat = {
+      ...currentChat,
+      messages: [...currentChat.messages, newMessage],
+      updatedAt: new Date(),
+    };
+    
+    setCurrentChat(updatedChat);
+    setChats(prev => prev.map(c => c.id === updatedChat.id ? updatedChat : c));
+  };
+
+  const sendMessage = (content: string) => {
+    if (!content.trim()) return;
+    
+    // Add user message
+    addUserMessage(content);
+    
+    // Set up agent status
+    setAgentStatus(AgentStatus.Thinking);
+    setCurrentScreenshots([]);
+    
+    // Add initial "thinking" message from agent
+    const thinkingAction: AgentAction = {
+      title: 'Thinking and working...',
+      status: AgentStatus.Thinking,
+    };
+    setCurrentAction(thinkingAction);
+    
+    // Get WebSocket client (already connected from useEffect)
+    const wsClient = getWebSocketClient();
+    
+    // Send task to the agent
+    wsClient.sendMessage({ task: content });
+    
+    // Update initial action to browser agent initializing
+    setTimeout(() => {
+      const initAction: AgentAction = {
+        title: 'Browser Agent - Executing browser actions',
+        description: 'Initializing browser agent...',
+        status: AgentStatus.Executing,
+      };
+      setCurrentAction(initAction);
+      setAgentStatus(AgentStatus.Executing);
+    }, 1500);
+  };
+
+  const value = {
+    chats,
+    currentChat,
+    agentStatus,
+    currentScreenshots,
+    currentAction,
+    isConnected,
+    sendMessage,
+    createNewChat,
+    selectChat,
+    deleteChat,
+  };
+
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
+};
+</file>
+
+<file path="package.json">
+{
+  "name": "c-drive-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.5",
+    "lucide-react": "^0.507.0",
+    "next": "^15.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.11.0",
+    "tailwind": "^4.0.0",
+    "typescript": "^5.2.2",
+    "zustand": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.7",
+    "@types/react": "^18.2.31",
+    "@types/react-dom": "^18.2.14",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.52.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.5"
+  }
+}
+</file>
+
+<file path="components/chat/ChatContainer.tsx">
+"use client"
+
+import type React from "react"
+import { useEffect, useRef } from "react"
+import { useChat } from "../../context/ChatContext"
+import ChatMessage from "./ChatMessage"
+import ChatInput from "./ChatInput"
+import AgentActionStatus from "./AgentActionStatus"
+
+const ChatContainer: React.FC = () => {
+  const { currentChat, agentStatus, currentAction, currentScreenshots, isConnected, sendMessage, createNewChat } =
+    useChat()
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [currentChat?.messages])
+
+  return (
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Header */}
+      {/* <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-medium text-gray-900">c-drive Analysis</h2>
+          {isConnected && (
+            <div className="flex items-center ml-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+              <span className="text-xs text-gray-500">Connected</span>
+            </div>
+          )}
+        </div>
+        <button
+          className="px-3 py-1 bg-amber-100 hover:bg-amber-200 rounded-md text-sm text-gray-800 border border-amber-200"
+          onClick={createNewChat}
+        >
+          New Analysis
+        </button>
+      </div> */}
+
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        {currentChat?.messages.map((message) => (
+          <ChatMessage key={message.id} message={message} />
+        ))}
+
+        {/* Current agent status if active */}
+        {currentAction && (
+          <AgentActionStatus action={currentAction} status={agentStatus} screenshots={currentScreenshots} />
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input area */}
+      <div className="p-4 border-t border-gray-200 bg-white">
+        <ChatInput onSendMessage={sendMessage} />
+      </div>
+    </div>
+  )
+}
+
+export default ChatContainer
+</file>
+
+<file path="components/chat/ActionStep.tsx">
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import type { Screenshot } from "../../lib/types"
+import { FiChevronDown, FiChevronRight } from "react-icons/fi"
+
+interface ActionStepProps {
+  title: string
+  description?: string
+  screenshot: Screenshot // Single screenshot
+  status: string
+  isLoading?: boolean
+}
+
+const ActionStep: React.FC<ActionStepProps> = ({ title, description, screenshot, status, isLoading = false }) => {
+  const [isExpanded, setIsExpanded] = useState(true)
+
+  return (
+    <div
+      className="border border-gray-200 rounded-lg mb-3 overflow-hidden bg-white"
+      style={{ width: "fit-content", maxWidth: "100%" }}
+    >
+      {/* Header */}
+      <div
+        className="flex items-center gap-2 p-3 cursor-pointer hover:bg-amber-50 w-full"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="text-gray-400">{isExpanded ? <FiChevronDown size={18} /> : <FiChevronRight size={18} />}</div>
+
+        {isLoading && (
+          <div className="animate-spin mr-2 text-amber-600">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+          </div>
+        )}
+
+        <div className="font-medium text-gray-900">{title || `Step ${screenshot.step}`}</div>
+
+        {status && <div className="text-xs text-gray-500 ml-auto">{status}</div>}
+      </div>
+
+      {/* Content */}
+      {isExpanded && (
+        <div className="p-3 border-t border-gray-100">
+          {description && <div className="text-sm text-gray-700 mb-3">{description}</div>}
+
+          <div className="border border-gray-200 rounded overflow-hidden" style={{ maxWidth: "400px" }}>
+            {screenshot.base64 ? (
+              <img
+                src={`data:image/png;base64,${screenshot.base64}`}
+                alt={`Screenshot step ${screenshot.step}`}
+                className="w-full object-contain"
+              />
+            ) : (
+              <img
+                src={screenshot.url || "/placeholder.svg"}
+                alt={`Screenshot step ${screenshot.step}`}
+                className="w-full object-contain"
+              />
+            )}
+            <div className="text-xs text-gray-500 p-2 bg-gray-50">
+              Step {screenshot.step}
+              {screenshot.description && ` - ${screenshot.description}`}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default ActionStep
+</file>
+
+<file path="components/chat/AgentActionStatus.tsx">
+"use client"
+
+import type React from "react"
+import { type AgentAction, AgentStatus, type Screenshot } from "../../lib/types"
+import ActionStep from "./ActionStep"
+
+interface AgentActionStatusProps {
+  action: AgentAction
+  status: AgentStatus
+  screenshots: Screenshot[]
+}
+
+const AgentActionStatus: React.FC<AgentActionStatusProps> = ({ action, status, screenshots }) => {
+  const getStatusText = () => {
+    switch (status) {
+      case AgentStatus.Thinking:
+        return "Thinking..."
+      case AgentStatus.Executing:
+        return "Executing..."
+      case AgentStatus.Error:
+        return "Error"
+      case AgentStatus.Done:
+        return "Done"
+      default:
+        return ""
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-start w-auto">
+      {/* Show action header */}
+      <div className="mb-2">
+        <div className="font-medium text-gray-900">{action.title}</div>
+        {action.description && <div className="text-sm text-gray-700">{action.description}</div>}
+      </div>
+
+      {/* Show each screenshot as a separate step */}
+      {screenshots.map((screenshot, index) => (
+        <ActionStep
+          key={index}
+          title={`Step ${screenshot.step}`}
+          screenshot={screenshot}
+          status={getStatusText()}
+          isLoading={status === AgentStatus.Thinking || status === AgentStatus.Executing}
+        />
+      ))}
+
+      {/* If no screenshots but still in progress */}
+      {screenshots.length === 0 && (
+        <div
+          className="border border-gray-200 rounded-lg p-3 bg-white"
+          style={{ width: "fit-content", maxWidth: "100%" }}
+        >
+          <div className="flex items-center gap-3">
+            {status === AgentStatus.Thinking && (
+              <div className="animate-pulse text-amber-600">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                  <path
+                    d="M12 6V12L16 14"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            )}
+            <div className="font-medium text-gray-900">{action.title}</div>
+            <div className="text-sm text-gray-500 ml-auto">{getStatusText()}</div>
+          </div>
+          {status === AgentStatus.Thinking && (
+            <div className="space-y-2 mt-4">
+              <div className="h-2 bg-amber-100 rounded animate-pulse w-3/4"></div>
+              <div className="h-2 bg-amber-100 rounded animate-pulse w-1/2"></div>
+              <div className="h-2 bg-amber-100 rounded animate-pulse w-5/6"></div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default AgentActionStatus
+</file>
+
+<file path="components/chat/ChatMessage.tsx">
+"use client"
+
+import type React from "react"
+import { type Message, MessageRole, AgentStatus } from "../../lib/types"
+import ActionStep from "./ActionStep"
+
+interface ChatMessageProps {
+  message: Message
+}
+
+const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const isUser = message.role === MessageRole.User
+
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={`rounded-lg p-4 ${
+          isUser ? "bg-amber-100 text-gray-800 border border-amber-200" : "bg-white border border-gray-200"
+        }`}
+        style={{ width: "auto", maxWidth: "100%" }}
+      >
+        {/* User message or agent plain response */}
+        <div className="whitespace-pre-wrap mb-3">{message.content}</div>
+
+        {/* Agent actions with steps */}
+        {!isUser && message.agentActions && message.agentActions.length > 0 && (
+          <div className="mt-4">
+            {/* Render action header */}
+            {message.agentActions.map((action, index) => (
+              <div key={index} className="mb-2">
+                <div className="font-medium text-gray-900">{action.title}</div>
+                {action.description && <div className="text-sm text-gray-700">{action.description}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Screenshots as individual steps */}
+        {!isUser && message.screenshots && message.screenshots.length > 0 && (
+          <div className="mt-4 flex flex-col items-start">
+            {message.screenshots.map((screenshot, index) => (
+              <ActionStep
+                key={index}
+                title={`Step ${screenshot.step}`}
+                screenshot={screenshot}
+                status={
+                  index === message.screenshots!.length - 1 &&
+                  message.agentActions &&
+                  message.agentActions[0]?.status === AgentStatus.Executing
+                    ? "Executing..."
+                    : "Completed"
+                }
+                isLoading={
+                  index === message.screenshots!.length - 1 &&
+                  message.agentActions &&
+                  (message.agentActions[0]?.status === AgentStatus.Thinking ||
+                    message.agentActions[0]?.status === AgentStatus.Executing)
+                }
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default ChatMessage
+</file>
+
+</files>
